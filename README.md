@@ -58,9 +58,6 @@ The web interface will be available at: http://localhost:5000
 - `/status` - Check current court status
 - `/open` - Set courts as OPEN
 - `/closed` - Set courts as CLOSED
-- `/critical_open` - Set courts as CRITICALLY OPEN (emergency access)
-- `/critical_closed` - Set courts as CRITICALLY CLOSED (emergency closure)
-- `/auto` - Enable automatic status based on weather and time
 
 ## API Endpoints
 
@@ -72,15 +69,8 @@ The web interface will be available at: http://localhost:5000
 
 1. **Open** 🟢 - Courts are available for normal play
 2. **Closed** 🔴 - Courts are not available (weather, maintenance, hours)
-3. **Critically Open** 🟡 - Courts available for emergency/priority access only
-4. **Critically Closed** ⚫ - Courts closed due to emergency conditions
 
-## Automatic Status Logic
-
-The system automatically updates status based on:
-- **Time**: Courts closed outside 6 AM - 8 PM
-- **Weather**: Closed if precipitation > 50% or temperature < 35°F or > 95°F
-- **Manual Override**: Admin can override automatic status via Telegram
+rride**: Admin can override automatic status via Telegram
 
 ## Security
 

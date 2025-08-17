@@ -13,14 +13,14 @@ import logging
 from datetime import datetime
 from typing import Dict, Any
 from flask import Flask, jsonify, render_template
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application
 import threading
 import time
 from dotenv import load_dotenv
 import aiohttp
 import asyncio
 import weather_set
+from telegram_handlers import TelegramHandlers
 
 # Load environment variables
 load_dotenv()
@@ -34,16 +34,22 @@ logger = logging.getLogger(__name__)
 
 # Flask app
 app = Flask(__name__)
+DEFAULT_OPEN_HOUR = int(os.getenv('DEFAULT_OPEN_HOUR'))
+DEFAULT_CLOSE_HOUR = str(os.getenv('DEFAULT_CLOSE_HOUR'))
 
 # Court status storage (in production, use a database)
 COURT_STATUS = {
-    "status": "open",  # open, closed
+    "status": "open",  # open, closed, closed_until
     "temperature": 0,
     "precipitation": 0,
     "conditions": "Checking conditions...",
     "last_updated": datetime.now().isoformat(),
     "updated_by": "system",
-    "manual_override": False
+    "manual_override": False,
+    "notes": "",  # Additional notes about court status
+    "hours": {"open": DEFAULT_OPEN_HOUR, "close": DEFAULT_CLOSE_HOUR},  # Regular operating hours
+    "hours_override": None,  # Temporary hours override for specific day
+    "closed_until": None  # ISO datetime string for when courts reopen
 }
 CONDITIONS = weather_set.MET_WEATHER_CONDITIONS
 
@@ -59,8 +65,7 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', 5001))
 
 # Auto Status Logic
 WEATHER_LOCATION = os.getenv('WEATHER_LOCATION', 'New York, NY')
-DEFAULT_OPEN_HOUR = int(os.getenv('DEFAULT_OPEN_HOUR', 6))
-DEFAULT_CLOSE_HOUR = int(os.getenv('DEFAULT_CLOSE_HOUR', 20))
+
 
 
 
@@ -141,7 +146,7 @@ def get_status():
 @app.route('/api/status/<new_status>')
 def set_status(new_status):
     """Set court status (for testing - in production, use POST with authentication)"""
-    valid_statuses = ['open', 'closed']
+    valid_statuses = ['open', 'closed', 'closed_until']
     if new_status in valid_statuses:
         update_status(new_status, "api", manual_override=True)
         return jsonify({"success": True, "status": COURT_STATUS})
@@ -149,83 +154,12 @@ def set_status(new_status):
 
 
 
-# ... (REST OF TELEGRAM BOT COMMANDS - NO CHANGES)
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start command for Telegram bot"""
-    user_id = update.effective_user.id
-    if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
-        await update.message.reply_text("Sorry, you're not authorized to use this bot.")
-        return
-    
-    welcome_msg = """
-🎾 *Tennis Courts Control Bot* 🎾
-
-Available commands:
-/status - Check current court status
-/open - Set courts as OPEN
-/closed - Set courts as CLOSED
-
-Current status: *{}*
-Last updated: {}
-    """.format(COURT_STATUS['status'].upper(), COURT_STATUS['last_updated'])
-    
-    await update.message.reply_text(welcome_msg, parse_mode='Markdown')
-
-async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Get current status"""
-    user_id = update.effective_user.id
-    if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
-        await update.message.reply_text("Sorry, you're not authorized to use this bot.")
-        return
-    
-    status_icons = {
-        'open': '🟢',
-        'closed': '🔴',
-    }
-    
-    icon = status_icons.get(COURT_STATUS['status'], '❓')
-    
-    status_msg = f"""
-{icon} *Court Status: {COURT_STATUS['status'].upper().replace('_', ' ')}*
-
-🌡️ Temperature: {COURT_STATUS['temperature']}°F
-🌧️ Precipitation: {COURT_STATUS['precipitation']}%
-🎾 Conditions: {COURT_STATUS['conditions']}
-
-📅 Last updated: {COURT_STATUS['last_updated']}
-👤 Updated by: {COURT_STATUS['updated_by']}
-🔧 Manual override: {'Yes' if COURT_STATUS['manual_override'] else 'No'}
-    """
-    
-    await update.message.reply_text(status_msg, parse_mode='Markdown')
-
-async def set_open(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Set courts as open"""
-    user_id = update.effective_user.id
-    if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
-        await update.message.reply_text("Sorry, you're not authorized to use this bot.")
-        return
-    
-    username = update.effective_user.username or f"user_{user_id}"
-    update_status("open", f"telegram:{username}", manual_override=True)
-    await update.message.reply_text("🟢 Courts set to OPEN")
-
-async def set_closed(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Set courts as closed"""
-    user_id = update.effective_user.id
-    if AUTHORIZED_USERS and user_id not in AUTHORIZED_USERS:
-        await update.message.reply_text("Sorry, you're not authorized to use this bot.")
-        return
-    
-    username = update.effective_user.username or f"user_{user_id}"
-    update_status("closed", f"telegram:{username}", manual_override=True)
-    await update.message.reply_text("🔴 Courts set to CLOSED")
-
 telegram_application = None
+telegram_handlers = None
 
 def setup_telegram_bot():
-    """Setup Telegram bot (synchronous version)"""
-    global telegram_application
+    """Setup Telegram bot with new handlers"""
+    global telegram_application, telegram_handlers
     
     if TELEGRAM_BOT_TOKEN == 'YOUR_BOT_TOKEN_HERE':
         logger.warning("Telegram bot token not configured. Bot will not start.")
@@ -234,13 +168,17 @@ def setup_telegram_bot():
     try:
         telegram_application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
         
-        # Add command handlers
-        telegram_application.add_handler(CommandHandler("start", start))
-        telegram_application.add_handler(CommandHandler("status", status_command))
-        telegram_application.add_handler(CommandHandler("open", set_open))
-        telegram_application.add_handler(CommandHandler("closed", set_closed))
+        # Create telegram handlers instance
+        telegram_handlers = TelegramHandlers(
+            court_status_dict=COURT_STATUS,
+            update_status_func=update_status,
+            authorized_users=AUTHORIZED_USERS
+        )
         
-        logger.info("Telegram bot configured successfully")
+        # Setup all handlers
+        telegram_handlers.setup_handlers(telegram_application)
+        
+        logger.info("Telegram bot configured successfully with new handlers")
         return telegram_application
         
     except Exception as e:
