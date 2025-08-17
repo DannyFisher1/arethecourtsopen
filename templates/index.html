@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Are The Tennis Courts Open? - Central Park</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -39,7 +36,6 @@
         </header>
 
         <main class="max-w-3xl mx-auto">
-            <!-- Current Status Card -->
             <div id="statusCard" class="bg-white rounded-xl p-8 mb-8 transition-all duration-500">
                 <div class="flex flex-col md:flex-row items-center justify-between">
                     <div class="flex items-center mb-4 md:mb-0">
@@ -59,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- Notes Section -->
             <div id="notesSection" class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 rounded-lg hidden">
                 <div class="flex items-start">
                     <i class="fas fa-sticky-note text-amber-500 mt-1 mr-3"></i>
@@ -70,9 +65,7 @@
                 </div>
             </div>
 
-            <!-- Weather and Conditions -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <!-- Temperature Card -->
                 <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
                     <div class="flex items-center">
                         <i class="fas fa-temperature-high text-2xl text-red-400 mr-4"></i>
@@ -83,7 +76,6 @@
                     </div>
                 </div>
             
-                <!-- Precipitation Card -->
                 <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
                     <div class="flex items-center">
                         <i class="fas fa-cloud-rain text-2xl text-blue-400 mr-4"></i>
@@ -94,7 +86,6 @@
                     </div>
                 </div>
             
-                <!-- Conditions Card -->
                 <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
                     <div class="flex items-center space-x-4">
                       <i class="text-2xl text-indigo-400"></i>
@@ -107,7 +98,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Map -->
             <div class="bg-white rounded-xl overflow-hidden">
                 <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6639.319113314451!2d-73.9620658!3d40.789886599999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25988f989506d%3A0x6d87771a059466ba!2sCentral%20Park%20Tennis%20Center!5e1!3m2!1sen!2sus!4v1755451031278!5m2!1sen!2sus" 
@@ -128,7 +118,6 @@
     </div>
 
     <script>
-        // Fetch court status from backend API
         async function fetchCourtStatus() {
             try {
                 const response = await fetch('/api/status');
@@ -138,13 +127,10 @@
                 return await response.json();
             } catch (error) {
                 console.error('Error fetching court status:', error);
-                // Fallback to not available page if backend is not available
                 window.location.href = 'https://www.nycgovparks.org/tennis/';
-                
             }
         }
 
-        // Update the UI with the status
         async function updateStatus() {
             const statusData = await fetchCourtStatus();
             
@@ -153,7 +139,6 @@
             const statusText = document.getElementById('statusText');
             const statusSubtext = document.getElementById('statusSubtext');
             
-            // Reset all status classes
             statusCard.classList.remove('status-open', 'status-closed', 'bg-green-50', 'bg-red-50', 'bg-yellow-50', 'bg-gray-100');
             
             switch (statusData.status) {
@@ -203,22 +188,26 @@
             document.getElementById('precip').textContent = `${statusData.precipitation}%`;
             document.getElementById('conditions').textContent = statusData.conditions;
             
-            // Update hours display
+            function formatTime12Hour(hour) {
+                if (hour === 0) return '12:00 AM';
+                if (hour < 12) return `${hour}:00 AM`;
+                if (hour === 12) return '12:00 PM';
+                return `${hour - 12}:00 PM`;
+            }
+            
             if (statusData.hours) {
-                let hoursText = `${statusData.hours.open}:00 - ${statusData.hours.close}:00`;
+                let hoursText = `${formatTime12Hour(statusData.hours.open)} - ${formatTime12Hour(statusData.hours.close)}`;
                 
-                // Check for today's hours override
                 if (statusData.hours_override) {
                     const today = new Date().toISOString().split('T')[0];
                     if (statusData.hours_override.date === today) {
-                        hoursText = `${statusData.hours_override.hours.open}:00 - ${statusData.hours_override.hours.close}:00 (Today)`;
+                        hoursText = `${formatTime12Hour(statusData.hours_override.hours.open)} - ${formatTime12Hour(statusData.hours_override.hours.close)} (Today)`;
                     }
                 }
                 
                 document.getElementById('hoursDisplay').textContent = `Hours: ${hoursText}`;
             }
             
-            // Handle notes display
             const notesSection = document.getElementById('notesSection');
             const notesText = document.getElementById('notesText');
             
@@ -229,11 +218,9 @@
                 notesSection.classList.add('hidden');
             }
             
-            // Format the last updated time
             const lastUpdated = new Date(statusData.last_updated);
             document.getElementById('lastUpdated').textContent = `Last updated: ${lastUpdated.toLocaleString()}`;
 
-            // Add status source indicator if available
             if (statusData.source === 'demo') {
                 const demoIndicator = document.createElement('div');
                 demoIndicator.className = 'text-sm text-orange-600 mt-2';
@@ -242,13 +229,9 @@
             }
         }
 
-        // Initial load
         updateStatus();
-        
-        // Update every 5 minutes
         setInterval(updateStatus, 5 * 60 * 1000);
         
-        // Also update when tab becomes visible again
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 updateStatus();
