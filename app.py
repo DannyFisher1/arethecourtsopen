@@ -122,6 +122,16 @@ def update_status(status: str, updated_by: str = "system", manual_override: bool
     
     logger.info(f"Court status updated to '{status}' by {updated_by}")
 
+def update_weather_only(weather_data: dict):
+    """Update only weather data without changing status timestamp"""
+    global COURT_STATUS
+    
+    # Only update weather-related fields
+    weather_fields = ["temperature", "precipitation", "conditions"]
+    for field in weather_fields:
+        if field in weather_data:
+            COURT_STATUS[field] = weather_data[field]
+
 # Flask routes
 @app.route('/')
 def index():
@@ -133,10 +143,10 @@ def get_status():
     """Get current court status and update weather"""
     from flask import request
     
-    # Update weather data using user's headers
+    # Update weather data using user's headers (without changing status timestamp)
     try:
         weather = get_weather_data(user_headers=request.headers)
-        COURT_STATUS.update(weather)
+        update_weather_only(weather)
     except Exception:
         # Continue without weather update if it fails
         pass

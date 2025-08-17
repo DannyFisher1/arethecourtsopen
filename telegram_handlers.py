@@ -45,22 +45,21 @@ class TelegramHandlers:
             await update.message.reply_text("Sorry, you're not authorized to use this bot.")
             return
 
-        welcome_msg = """
-🎾 *Tennis Courts Control Bot* 🎾
+        welcome_msg = f"""🎾 *Tennis Courts Control Bot* 🎾
 
 Available commands:
-/status - Check current court status
-/set_courts_open - Set courts as OPEN
-/set_courts_closed - Set courts as CLOSED  
-/set_courts_closed_until - Set courts closed until specific time
-/change_hours - Change court operating hours
+/status - Check current court status  
+/open - Set courts as OPEN  
+/closed - Set courts as CLOSED  
+/closed_until - Set courts closed until a specific time  
+/change_hours - Change court operating hours  
 /clear_notes - Clear status notes
 
-Current status: *{}*
-Last updated: {}
-        """.format(self.court_status['status'].upper(), self.court_status['last_updated'])
+Current status: *{self.court_status['status'].upper()}*  
+Last updated: {self.court_status['last_updated']}
+"""
 
-        await update.message.reply_text(welcome_msg, parse_mode='Markdown')
+        await update.message.reply_text(welcome_msg)
 
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Get current status"""
@@ -111,7 +110,7 @@ Last updated: {}
 
         await update.message.reply_text(status_msg, parse_mode='Markdown')
 
-    async def set_courts_open(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def open(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Set courts as open with optional notes"""
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
@@ -136,7 +135,7 @@ Last updated: {}
             reply_markup=reply_markup
         )
 
-    async def set_courts_closed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def closed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Set courts as closed with optional notes"""
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
@@ -161,7 +160,7 @@ Last updated: {}
             reply_markup=reply_markup
         )
 
-    async def set_courts_closed_until(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def closed_until(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Set courts closed until specific time"""
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
@@ -210,8 +209,11 @@ Last updated: {}
             await update.message.reply_text("Sorry, you're not authorized to use this bot.")
             return
 
+        username = update.effective_user.username or f"user_{user_id}"
+        
         self.court_status['notes'] = ""
-        self.court_status['last_updated'] = datetime.now().isoformat()
+        self.court_status['last_updated'] = datetime.now().strftime('%Y-%m-%dT%H:%M')
+        self.court_status['updated_by'] = f"telegram:{username}"
         
         await update.message.reply_text("🗑️ Status notes cleared")
 
@@ -281,8 +283,11 @@ Last updated: {}
     async def handle_notes_input(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle notes input from user"""
         notes = update.message.text
+        username = update.effective_user.username or f"user_{update.effective_user.id}"
+        
         self.court_status['notes'] = notes
         self.court_status['last_updated'] = datetime.now().isoformat()
+        self.court_status['updated_by'] = f"telegram:{username}"
         
         await update.message.reply_text(f"✅ Notes added: {notes}")
         return ConversationHandler.END
@@ -336,6 +341,8 @@ Last updated: {}
                 
                 hours_type = context.user_data['hours_type']
                 
+                username = update.effective_user.username or f"user_{update.effective_user.id}"
+                
                 if hours_type == 'hours_permanent':
                     self.court_status['hours'] = {"open": open_hour, "close": close_hour}
                     await update.message.reply_text(f"✅ Hours permanently changed to {open_hour}:00 - {close_hour}:00")
@@ -348,6 +355,7 @@ Last updated: {}
                     await update.message.reply_text(f"✅ Hours changed for today only: {open_hour}:00 - {close_hour}:00")
                 
                 self.court_status['last_updated'] = datetime.now().isoformat()
+                self.court_status['updated_by'] = f"telegram:{username}"
                 
             except ValueError as e:
                 await update.message.reply_text(
@@ -383,9 +391,9 @@ Last updated: {}
         # Command handlers
         application.add_handler(CommandHandler("start", self.start))
         application.add_handler(CommandHandler("status", self.status_command))
-        application.add_handler(CommandHandler("set_courts_open", self.set_courts_open))
-        application.add_handler(CommandHandler("set_courts_closed", self.set_courts_closed))
-        application.add_handler(CommandHandler("set_courts_closed_until", self.set_courts_closed_until))
+        application.add_handler(CommandHandler("open", self.open))
+        application.add_handler(CommandHandler("closed", self.closed))
+        application.add_handler(CommandHandler("closed_until", self.closed_until))
         application.add_handler(CommandHandler("change_hours", self.change_hours))
         application.add_handler(CommandHandler("clear_notes", self.clear_notes))
         
