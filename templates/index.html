@@ -53,80 +53,52 @@
                     <div class="text-center md:text-right">
                         <div id="statusText" class="text-3xl font-bold mb-1">Checking...</div>
                         <div id="statusSubtext" class="text-lg">Loading current status</div>
+                        <div id="lastUpdated" class="text-sm text-gray-500">Last updated: --</div>
                     </div>
                 </div>
             </div>
 
             <!-- Weather and Conditions -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="weather-card rounded-xl p-6 border border-gray-200">
-                    <div class="flex items-center mb-4">
-                        <i class="fas fa-temperature-high text-3xl text-blue-500 mr-3"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <!-- Temperature Card -->
+                <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
+                    <div class="flex items-center">
+                        <i class="fas fa-temperature-high text-2xl text-red-400 mr-4"></i>
                         <div>
-                            <h3 class="font-medium text-gray-700">Temperature</h3>
-                            <div id="temp" class="text-2xl font-bold">--°F</div>
+                            <h3 class="font-medium text-gray-500 text-xs uppercase tracking-wider">Temperature</h3>
+                            <div id="temp" class="text-2xl font-semibold text-gray-800">--°F</div>
                         </div>
                     </div>
                 </div>
-                <div class="weather-card rounded-xl p-6 border border-gray-200">
-                    <div class="flex items-center mb-4">
-                        <i class="fas fa-cloud-rain text-3xl text-blue-400 mr-3"></i>
+            
+                <!-- Precipitation Card -->
+                <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
+                    <div class="flex items-center">
+                        <i class="fas fa-cloud-rain text-2xl text-blue-400 mr-4"></i>
                         <div>
-                            <h3 class="font-medium text-gray-700">Precipitation</h3>
-                            <div id="precip" class="text-2xl font-bold">--%</div>
+                            <h3 class="font-medium text-gray-500 text-xs uppercase tracking-wider">Precipitation</h3>
+                            <div id="precip" class="text-2xl font-semibold text-gray-800">--%</div>
                         </div>
                     </div>
                 </div>
-                <div class="weather-card rounded-xl p-6 border border-gray-200">
-                    <div class="flex items-center mb-4">
-                        <i class="fas fa-clock text-3xl text-purple-500 mr-3"></i>
-                        <div>
-                            <h3 class="font-medium text-gray-700">Hours</h3>
-                            <div class="text-2xl font-bold">6AM - Dusk</div>
+            
+                <!-- Conditions Card -->
+                <div class="weather-card p-5 bg-white border border-gray-100 shadow-xs hover:shadow-sm transition-all">
+                    <div class="flex items-center space-x-4">
+                      <i class="text-2xl text-indigo-400"></i>
+                      <div class="min-w-0">
+                        <h3 class="font-medium text-gray-500 text-xs uppercase tracking-wider">Conditions</h3>
+                        <div id="conditions" class="text-2xl font-medium text-gray-800 truncate break-words max-w-[12rem]">
+                          --
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Info -->
-            <div class="bg-white rounded-xl p-6 mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Court Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-start">
-                        <i class="fas fa-map-marker-alt text-green-500 mt-1 mr-3"></i>
-                        <div>
-                            <h4 class="font-medium text-gray-700">Location</h4>
-                            <p class="text-gray-600">Central Park Tennis Center, 93rd & Central Park West</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <i class="fas fa-clipboard-list text-blue-500 mt-1 mr-3"></i>
-                        <div>
-                            <h4 class="font-medium text-gray-700">Conditions</h4>
-                            <p id="conditions" class="text-gray-600">Loading...</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <i class="fas fa-calendar-day text-orange-500 mt-1 mr-3"></i>
-                        <div>
-                            <h4 class="font-medium text-gray-700">Last Updated</h4>
-                            <p id="lastUpdated" class="text-gray-600">Just now</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <i class="fas fa-phone text-purple-500 mt-1 mr-3"></i>
-                        <div>
-                            <h4 class="font-medium text-gray-700">Contact</h4>
-                            <p class="text-gray-600">(212) 310-6600</p>
-                        </div>
+                      </div>
                     </div>
                 </div>
             </div>
-
             <!-- Map -->
             <div class="bg-white rounded-xl overflow-hidden">
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3020.5542!2d-73.9585!3d40.7851!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c2589a018588a3%3A0x74a1b9dff505c8f1!2sCentral%20Park%20Tennis%20Center!5e0!3m2!1sen!2sus!4v1689876543210!5m2!1sen!2sus" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6639.319113314451!2d-73.9620658!3d40.789886599999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25988f989506d%3A0x6d87771a059466ba!2sCentral%20Park%20Tennis%20Center!5e1!3m2!1sen!2sus!4v1755451031278!5m2!1sen!2sus" 
                     width="100%" 
                     height="300" 
                     style="border:0;" 
@@ -139,8 +111,7 @@
         </main>
 
         <footer class="mt-16 text-center text-gray-500 text-sm">
-            <p>Data updates every 5 minutes. Status is based on weather and park conditions.</p>
-            <p class="mt-2">© 2023 Are The Courts Open? Not affiliated with NYC Parks.</p>
+            <p class="mt-2">© 2025 Are The Courts Open? Not affiliated with NYC Parks.</p>
         </footer>
     </div>
 
@@ -155,20 +126,9 @@
                 return await response.json();
             } catch (error) {
                 console.error('Error fetching court status:', error);
-                // Fallback to demo data if backend is not available
-                const now = new Date();
-                const isOpenHours = now.getHours() >= 6 && now.getHours() < 20;
-                const temp = Math.floor(Math.random() * 30) + 50;
-                const isRaining = Math.random() > 0.7;
+                // Fallback to not available page if backend is not available
+                window.location.href = 'https://www.nycgovparks.org/tennis/';
                 
-                return {
-                    status: isOpenHours && !isRaining ? 'open' : 'closed',
-                    temperature: temp,
-                    precipitation: isRaining ? Math.floor(Math.random() * 50) + 30 : 0,
-                    conditions: isRaining ? 'Wet courts' : 'Courts available for tennis',
-                    lastUpdated: new Date().toLocaleTimeString(),
-                    source: 'demo'
-                };
             }
         }
 
@@ -202,25 +162,7 @@
                     statusSubtext.textContent = 'Tennis courts are not available';
                     statusSubtext.className = 'text-lg text-red-700';
                     break;
-                    
-                case 'critically_open':
-                    statusCard.classList.add('bg-yellow-50');
-                    statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
-                    statusText.textContent = 'CRITICALLY OPEN';
-                    statusText.className = 'text-3xl font-bold mb-1 text-yellow-600';
-                    statusSubtext.textContent = 'Emergency access only';
-                    statusSubtext.className = 'text-lg text-yellow-700';
-                    break;
-                    
-                case 'critically_closed':
-                    statusCard.classList.add('bg-gray-100');
-                    statusIcon.innerHTML = '<i class="fas fa-ban text-gray-500"></i>';
-                    statusText.textContent = 'CRITICALLY CLOSED';
-                    statusText.className = 'text-3xl font-bold mb-1 text-gray-600';
-                    statusSubtext.textContent = 'Emergency closure - No access';
-                    statusSubtext.className = 'text-lg text-gray-700';
-                    break;
-                    
+                        
                 default:
                     statusCard.classList.add('bg-gray-100');
                     statusIcon.innerHTML = '<i class="fas fa-question-circle text-gray-500"></i>';
@@ -237,7 +179,8 @@
             // Format the last updated time
             const lastUpdated = new Date(statusData.last_updated);
             document.getElementById('lastUpdated').textContent = lastUpdated.toLocaleString();
-            
+            document.getElementById('lastUpdated').textContent = lastUpdated.toLocaleString();
+
             // Add status source indicator if available
             if (statusData.source === 'demo') {
                 const demoIndicator = document.createElement('div');
