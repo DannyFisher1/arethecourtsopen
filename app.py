@@ -5,7 +5,7 @@ import os
 import asyncio
 from datetime import datetime
 from typing import Dict, Any
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from telegram.ext import Application
 import threading
 from dotenv import load_dotenv
@@ -17,13 +17,19 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# --- Configuration and Initial State ---
 DEFAULT_OPEN_HOUR = int(os.getenv('DEFAULT_OPEN_HOUR', '6'))
 DEFAULT_CLOSE_HOUR = int(os.getenv('DEFAULT_CLOSE_HOUR', '20'))
 WEATHER_LAT = float(os.getenv('WEATHER_LAT', '40.7128'))
 WEATHER_LON = float(os.getenv('WEATHER_LON', '-74.0060'))
 INITIAL_STATUS = os.getenv('INITIAL_STATUS', 'open')
 INITIAL_CONDITIONS = os.getenv('INITIAL_CONDITIONS', 'Checking conditions...')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+AUTHORIZED_USERS = set(map(int, os.getenv('AUTHORIZED_USERS', '').split(',')) if os.getenv('AUTHORIZED_USERS') else [])
+FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
+FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 
+# --- In-memory Application State ---
 COURT_STATUS = {
     "status": INITIAL_STATUS,
     "temperature": 0,
@@ -39,20 +45,23 @@ COURT_STATUS = {
 }
 CONDITIONS = weather_set.MET_WEATHER_CONDITIONS
 
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-AUTHORIZED_USERS = set(map(int, os.getenv('AUTHORIZED_USERS', '').split(',')) if os.getenv('AUTHORIZED_USERS') else [])
-FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
+telegram_application = None
+telegram_handlers = None
 
-async def get_met_weather(lat=None, lon=None, user_headers=None):
+# --- Core Functions ---
+async def get_met_weather(lat=None, lon=None):
     lat = lat or WEATHER_LAT
     lon = lon or WEATHER_LON
     url = f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={lat}&lon={lon}"
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
+            # Note: Production servers may require specific headers, e.g., a User-Agent.
+            # For met.no, a User-Agent is good practice.
+            headers = {'User-Agent': 'CourtStatusApp/1.0 yourdomain.com'}
+            async with session.get(url, headers=headers) as resp:
                 if resp.status != 200:
-                    raise Exception(f"Weather API returned status {resp.status}")
+                    print(f"Weather API returned status {resp.status}") # Added logging
+                    return None
                 
                 data = await resp.json()
                 current = data["properties"]["timeseries"][0]
@@ -66,18 +75,23 @@ async def get_met_weather(lat=None, lon=None, user_headers=None):
                 return weather_data
                 
     except Exception as e:
-        raise
+        print(f"Error fetching weather: {e}") # Added logging
+        return None
 
-def get_weather_data(user_headers=None):
+def get_weather_data():
     try:
-        weather_data = asyncio.run(get_met_weather(user_headers=user_headers))
-        return weather_data
+        weather_data = asyncio.run(get_met_weather())
+        if weather_data:
+            return weather_data
     except Exception as e:
-        return {
-            "temperature": 0,
-            "precipitation": 0,
-            "conditions": "Weather unavailable"
-        }
+        print(f"Error in get_weather_data: {e}") # Added logging
+
+    # Return a default error state if fetching fails
+    return {
+        "temperature": "N/A",
+        "precipitation": "N/A",
+        "conditions": "Weather unavailable"
+    }
 
 def update_status(status: str, updated_by: str = "system", manual_override: bool = False):
     global COURT_STATUS
@@ -97,20 +111,15 @@ def update_weather_only(weather_data: dict):
         if field in weather_data:
             COURT_STATUS[field] = weather_data[field]
 
+# --- Flask Routes ---
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/api/status')
 def get_status():
-    from flask import request
-    
-    try:
-        weather = get_weather_data(user_headers=request.headers)
-        update_weather_only(weather)
-    except Exception:
-        pass
-    
+    weather = get_weather_data()
+    update_weather_only(weather)
     return jsonify(COURT_STATUS)
 
 @app.route('/api/status/<new_status>')
@@ -121,13 +130,12 @@ def set_status(new_status):
         return jsonify({"success": True, "status": COURT_STATUS})
     return jsonify({"error": "Invalid status"}), 400
 
-telegram_application = None
-telegram_handlers = None
-
+# --- Telegram Bot Setup and Logic ---
 def setup_telegram_bot():
     global telegram_application, telegram_handlers
     
     if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN == 'YOUR_BOT_TOKEN_HERE':
+        print("Telegram bot token not found. Bot will not start.")
         return None
     
     try:
@@ -141,9 +149,11 @@ def setup_telegram_bot():
         
         telegram_handlers.setup_handlers(telegram_application)
         
+        print("Telegram bot setup complete.")
         return telegram_application
         
     except Exception as e:
+        print(f"Failed to set up Telegram bot: {e}")
         return None
 
 def run_telegram_bot():
@@ -157,28 +167,30 @@ def run_telegram_bot():
                 await bot_app.initialize()
                 await bot_app.start()
                 await bot_app.updater.start_polling(allowed_updates=["message", "callback_query"])
+                print("Telegram bot is running...")
                 
-                try:
-                    while True:
-                        await asyncio.sleep(1)
-                except asyncio.CancelledError:
-                    pass
-                finally:
-                    await bot_app.updater.stop()
-                    await bot_app.stop()
-                    await bot_app.shutdown()
+                # Keep the event loop running
+                while True:
+                    await asyncio.sleep(3600) # Sleep for a long time
             
             loop.run_until_complete(start_polling())
     except Exception as e:
-        pass
+        print(f"An error occurred in the Telegram bot thread: {e}")
     finally:
         if 'loop' in locals():
             loop.close()
 
-if __name__ == '__main__':
-    os.makedirs('templates', exist_ok=True)
-    
-    telegram_thread = threading.Thread(target=run_telegram_bot, daemon=True)
-    telegram_thread.start()
+# --- Application Entry Point ---
 
+print("Starting Telegram bot in a background thread...")
+telegram_thread = threading.Thread(target=run_telegram_bot, daemon=True)
+telegram_thread.start()
+
+if __name__ == '__main__':
+    print("Running Flask development server...")
+    # Make sure the templates directory exists for local development
+    os.makedirs('templates', exist_ok=True)
+
+    # Note: We do not start the thread here again because it's already started above.
+    # The Flask development server is for testing the web interface locally.
     app.run(host=FLASK_HOST, port=FLASK_PORT, debug=False, use_reloader=False)
