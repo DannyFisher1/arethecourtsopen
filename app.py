@@ -11,6 +11,7 @@ import threading
 from dotenv import load_dotenv
 import aiohttp
 import weather_set
+from zoneinfo import ZoneInfo
 from telegram_handlers import TelegramHandlers
 
 load_dotenv()
@@ -29,13 +30,17 @@ AUTHORIZED_USERS = set(map(int, os.getenv('AUTHORIZED_USERS', '').split(',')) if
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 
+
+TARGET_TZ = ZoneInfo("America/New_York")
+
+
 # --- In-memory Application State ---
 COURT_STATUS = {
     "status": INITIAL_STATUS,
     "temperature": 0,
     "precipitation": 0,
     "conditions": INITIAL_CONDITIONS,
-    "last_updated": datetime.now().isoformat(),
+    "last_updated": datetime.now(TARGET_TZ).isoformat(),
     "updated_by": "system",
     "manual_override": False,
     "notes": "",
