@@ -84,14 +84,6 @@ Current status: *{self.court_status['status'].upper()}*
 Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 """
 
-        keyboard = [
-            [InlineKeyboardButton("📊 Check Status", callback_data='check_status')],
-            [InlineKeyboardButton("🟢 Set Open", callback_data='set_open'), InlineKeyboardButton("🔴 Set Closed", callback_data='set_closed')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(welcome_msg, reply_markup=reply_markup)
-
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
@@ -335,6 +327,7 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
         application.add_handler(CommandHandler("status", self.status_command))
         application.add_handler(CommandHandler("open", self.open))
         application.add_handler(CommandHandler("closed", self.closed))
+        application.add_handler(CommandHandler("status", self.status_command))
 
         application.add_handler(CommandHandler("change_hours", self.change_hours))
         application.add_handler(CommandHandler("clear_notes", self.clear_notes))
