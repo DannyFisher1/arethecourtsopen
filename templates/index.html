@@ -236,11 +236,10 @@
             const year = lastUpdated.getFullYear();
             const hours = lastUpdated.getHours();
             const minutes = lastUpdated.getMinutes().toString().padStart(2, '0');
-            const seconds = lastUpdated.getSeconds().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const ampm = hours >= 12 ? ' PM' : ' AM';
             const displayHours = hours % 12 || 12;
             
-            const formattedTime = `${month} ${day}${suffix}, ${year} ${displayHours}:${minutes}:${seconds}${ampm}`;
+            const formattedTime = `${month} ${day}${suffix}, ${year} ${displayHours}:${minutes}${ampm}`;
             document.getElementById('lastUpdated').textContent = `Last updated: ${formattedTime}`;
 
             if (statusData.source === 'demo') {
