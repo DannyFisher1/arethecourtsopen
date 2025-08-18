@@ -42,6 +42,31 @@ class TelegramHandlers:
         else:
             return f"{hour - 12}:00 PM"
 
+    def _format_timestamp(self, iso_timestamp: str) -> str:
+        """Format ISO timestamp to 'August 18th, 2025 11:53:04AM' format"""
+        try:
+            dt = datetime.fromisoformat(iso_timestamp)
+            
+            months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December']
+            
+            day = dt.day
+            suffix = 'st' if day % 10 == 1 and day != 11 else \
+                    'nd' if day % 10 == 2 and day != 12 else \
+                    'rd' if day % 10 == 3 and day != 13 else 'th'
+            
+            month = months[dt.month - 1]
+            year = dt.year
+            hours = dt.hour
+            minutes = f"{dt.minute:02d}"
+            seconds = f"{dt.second:02d}"
+            ampm = 'PM' if hours >= 12 else 'AM'
+            display_hours = hours % 12 or 12
+            
+            return f"{month} {day}{suffix}, {year} {display_hours}:{minutes}:{seconds}{ampm}"
+        except:
+            return iso_timestamp  # fallback to original if parsing fails
+
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
@@ -59,7 +84,7 @@ Available commands:
 /clear_notes - Clear status notes
 
 Current status: *{self.court_status['status'].upper()}*  
-Last updated: {self.court_status['last_updated']}
+Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 """
 
         await update.message.reply_text(welcome_msg)
@@ -101,7 +126,7 @@ Last updated: {self.court_status['last_updated']}
 
         status_msg += f"""
 
-📅 Last updated: {self.court_status['last_updated']}
+📅 Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 👤 Updated by: {self.court_status['updated_by']}
 🔧 Manual override: {'Yes' if self.court_status['manual_override'] else 'No'}
         """
