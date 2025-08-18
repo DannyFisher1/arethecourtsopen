@@ -131,7 +131,6 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         keyboard = [
             [InlineKeyboardButton("🔄 Refresh Status", callback_data='check_status')],
-            [InlineKeyboardButton("🟢 Set Open", callback_data='set_open'), InlineKeyboardButton("🔴 Set Closed", callback_data='set_closed')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
