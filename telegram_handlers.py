@@ -26,8 +26,8 @@ class TelegramHandlers:
             self.court_status['hours'] = {"open": 6, "close": 20}
         if 'hours_override' not in self.court_status:
             self.court_status['hours_override'] = None
-        if 'closed_until' not in self.court_status:
-            self.court_status['closed_until'] = None
+        if 'check_back_at' not in self.court_status:
+            self.court_status['check_back_at'] = None
 
     def _check_authorization(self, user_id: int) -> bool:
         return not self.authorized_users or user_id in self.authorized_users
@@ -78,8 +78,7 @@ class TelegramHandlers:
 Available commands:
 /status - Check current court status  
 /open - Set courts as OPEN  
-/closed - Set courts as CLOSED  
-/closed_until - Set courts closed until a specific time  
+/closed - Set courts as CLOSED (with optional check back time)  
 /change_hours - Change court operating hours  
 /clear_notes - Clear status notes
 
@@ -98,7 +97,6 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
         status_icons = {
             'open': '🟢',
             'closed': '🔴',
-            'closed_until': '🟡',
         }
 
         icon = status_icons.get(self.court_status['status'], '❓')
@@ -112,9 +110,9 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
 🕐 Hours: {self._format_time_12h(self.court_status['hours']['open'])} - {self._format_time_12h(self.court_status['hours']['close'])}"""
 
-        if self.court_status['status'] == 'closed_until' and self.court_status.get('closed_until'):
-            closed_until = datetime.fromisoformat(self.court_status['closed_until'])
-            status_msg += f"\n⏰ Closed until: {closed_until.strftime('%Y-%m-%d %H:%M')}"
+        if self.court_status.get('check_back_at'):
+            check_back = datetime.fromisoformat(self.court_status['check_back_at'])
+            status_msg += f"\n⏰ Check back at: {check_back.strftime('%Y-%m-%d %H:%M')}"
 
         if self.court_status.get('notes'):
             status_msg += f"\n📝 Notes: {self.court_status['notes']}"
@@ -141,7 +139,7 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         username = update.effective_user.username or f"user_{user_id}"
         
-        self.court_status['closed_until'] = None
+        self.court_status['check_back_at'] = None
         self.update_status("open", f"telegram:{username}", manual_override=True)
         
         keyboard = [
@@ -163,21 +161,22 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         username = update.effective_user.username or f"user_{user_id}"
         
-        self.court_status['closed_until'] = None
+        self.court_status['check_back_at'] = None
         self.update_status("closed", f"telegram:{username}", manual_override=True)
         
         keyboard = [
             [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
+            [InlineKeyboardButton("Check back in X hours", callback_data='check_back_closed')],
             [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await update.message.reply_text(
-            "🔴 Courts set to CLOSED\n\nWould you like to add any notes?",
+            "🔴 Courts set to CLOSED\n\nWould you like to add notes or set a check back time?",
             reply_markup=reply_markup
         )
 
-    async def closed_until(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def check_back_hours(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
         if not self._check_authorization(user_id):
             await update.message.reply_text("Sorry, you're not authorized to use this bot.")
@@ -185,16 +184,16 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         now = datetime.now(TARGET_TZ)
         keyboard = [
-            [InlineKeyboardButton("1 hour", callback_data=f'closed_until_{(now + timedelta(hours=1)).isoformat()}')],
-            [InlineKeyboardButton("2 hours", callback_data=f'closed_until_{(now + timedelta(hours=2)).isoformat()}')],
-            [InlineKeyboardButton("4 hours", callback_data=f'closed_until_{(now + timedelta(hours=4)).isoformat()}')],
-            [InlineKeyboardButton("Until tomorrow 6 AM", callback_data=f'closed_until_{(now.replace(hour=6, minute=0, second=0) + timedelta(days=1)).isoformat()}')],
-            [InlineKeyboardButton("Custom time", callback_data='closed_until_custom')]
+            [InlineKeyboardButton("1 hour", callback_data=f'check_back_{(now + timedelta(hours=1)).isoformat()}')],
+            [InlineKeyboardButton("2 hours", callback_data=f'check_back_{(now + timedelta(hours=2)).isoformat()}')],
+            [InlineKeyboardButton("4 hours", callback_data=f'check_back_{(now + timedelta(hours=4)).isoformat()}')],
+            [InlineKeyboardButton("Until tomorrow 6 AM", callback_data=f'check_back_{(now.replace(hour=6, minute=0, second=0) + timedelta(days=1)).isoformat()}')],
+            [InlineKeyboardButton("Custom time", callback_data='check_back_custom')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await update.message.reply_text(
-            "🟡 How long should the courts be closed?",
+            "🕐 When should users check back?",
             reply_markup=reply_markup
         )
 
@@ -250,28 +249,33 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
             self.court_status['notes'] = ""
             await query.edit_message_text("✅ Status updated without notes")
             return ConversationHandler.END
+        
+        elif data == 'check_back_closed':
+            await self.check_back_hours(query, context)
+            return ConversationHandler.END
 
-        elif data.startswith('closed_until_'):
-            if data == 'closed_until_custom':
+        elif data.startswith('check_back_'):
+            if data == 'check_back_custom':
                 await query.edit_message_text(
-                    "📅 Please send the date and time when courts should reopen.\n"
+                    "📅 Please send the date and time when users should check back.\n"
                     "Format: YYYY-MM-DD HH:MM\n"
                     "Example: 2025-01-15 14:30"
                 )
                 return WAITING_FOR_HOURS_CHANGE
             else:
-                closed_until_str = data.replace('closed_until_', '')
-                self.court_status['closed_until'] = closed_until_str
+                check_back_str = data.replace('check_back_', '')
+                self.court_status['check_back_at'] = check_back_str
                 
                 username = query.from_user.username or f"user_{user_id}"
-                self.update_status("closed_until", f"telegram:{username}", manual_override=True)
+                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
+                self.court_status['updated_by'] = f"telegram:{username}"
                 
-                closed_until = datetime.fromisoformat(closed_until_str)
-                await query.edit_message_text(f"🟡 Courts set to CLOSED UNTIL {closed_until.strftime('%Y-%m-%d %H:%M')}")
+                check_back = datetime.fromisoformat(check_back_str)
+                await query.edit_message_text(f"🕐 Check back time set to {check_back.strftime('%Y-%m-%d %H:%M')}")
                 
                 keyboard = [
-                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed_until')],
-                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed_until')]
+                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
+                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
@@ -306,18 +310,19 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
         if 'hours_type' not in context.user_data:
             try:
                 # Parse the datetime and assume it's in New York timezone
-                closed_until_naive = datetime.strptime(text, '%Y-%m-%d %H:%M')
-                closed_until = closed_until_naive.replace(tzinfo=TARGET_TZ)
-                self.court_status['closed_until'] = closed_until.isoformat()
+                check_back_naive = datetime.strptime(text, '%Y-%m-%d %H:%M')
+                check_back = check_back_naive.replace(tzinfo=TARGET_TZ)
+                self.court_status['check_back_at'] = check_back.isoformat()
                 
                 username = update.effective_user.username or f"user_{update.effective_user.id}"
-                self.update_status("closed_until", f"telegram:{username}", manual_override=True)
+                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
+                self.court_status['updated_by'] = f"telegram:{username}"
                 
-                await update.message.reply_text(f"🟡 Courts set to CLOSED UNTIL {closed_until.strftime('%Y-%m-%d %H:%M')}")
+                await update.message.reply_text(f"🕐 Check back time set to {check_back.strftime('%Y-%m-%d %H:%M')}")
                 
                 keyboard = [
-                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed_until')],
-                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed_until')]
+                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
+                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
@@ -394,7 +399,7 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
         application.add_handler(CommandHandler("status", self.status_command))
         application.add_handler(CommandHandler("open", self.open))
         application.add_handler(CommandHandler("closed", self.closed))
-        application.add_handler(CommandHandler("closed_until", self.closed_until))
+
         application.add_handler(CommandHandler("change_hours", self.change_hours))
         application.add_handler(CommandHandler("clear_notes", self.clear_notes))
         

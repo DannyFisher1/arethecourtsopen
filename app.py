@@ -46,7 +46,7 @@ COURT_STATUS = {
     "notes": "",
     "hours": {"open": DEFAULT_OPEN_HOUR, "close": DEFAULT_CLOSE_HOUR},
     "hours_override": None,
-    "closed_until": None
+    "check_back_at": None
 }
 CONDITIONS = weather_set.MET_WEATHER_CONDITIONS
 
@@ -129,7 +129,7 @@ def get_status():
 
 @app.route('/api/status/<new_status>')
 def set_status(new_status):
-    valid_statuses = ['open', 'closed', 'closed_until']
+    valid_statuses = ['open', 'closed']
     if new_status in valid_statuses:
         update_status(new_status, "api", manual_override=True)
         return jsonify({"success": True, "status": COURT_STATUS})

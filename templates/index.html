@@ -140,7 +140,7 @@
             const statusText = document.getElementById('statusText');
             const statusSubtext = document.getElementById('statusSubtext');
             
-            statusCard.classList.remove('status-open', 'status-closed', 'bg-green-50', 'bg-red-50', 'bg-yellow-50', 'bg-gray-100');
+            statusCard.classList.remove('status-open', 'status-closed', 'bg-green-50', 'bg-red-50', 'bg-gray-100');
             
             switch (statusData.status) {
                 case 'open':
@@ -157,17 +157,21 @@
                     statusIcon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
                     statusText.textContent = 'CLOSED';
                     statusText.className = 'text-3xl font-bold mb-1 text-red-600';
-                    statusSubtext.textContent = '\n';
+                    
+                    if (statusData.check_back_at) {
+                        const checkBackTime = new Date(statusData.check_back_at);
+                        const checkBackFormatted = checkBackTime.toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                        statusSubtext.textContent = `Check back at ${checkBackFormatted}`;
+                    } else {
+                        statusSubtext.textContent = '\n';
+                    }
                     statusSubtext.className = 'text-lg text-red-700';
-                    break;
-
-                case 'closed_until':
-                    statusCard.classList.add('bg-yellow-50');
-                    statusIcon.innerHTML = '<i class="fas fa-clock text-yellow-500"></i>';
-                    statusText.textContent = 'CLOSED UNTIL';
-                    statusText.className = 'text-3xl font-bold mb-1 text-yellow-600';
-                    statusSubtext.textContent = 'Courts temporarily closed';
-                    statusSubtext.className = 'text-lg text-yellow-700';
                     break;
                         
                 default:
