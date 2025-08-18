@@ -157,20 +157,7 @@
                     statusIcon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
                     statusText.textContent = 'CLOSED';
                     statusText.className = 'text-3xl font-bold mb-1 text-red-600';
-                    
-                    if (statusData.check_back_at) {
-                        const checkBackTime = new Date(statusData.check_back_at);
-                        const checkBackFormatted = checkBackTime.toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-                        statusSubtext.textContent = `Check back at ${checkBackFormatted}`;
-                    } else {
-                        statusSubtext.textContent = '\n';
-                    }
+                    statusSubtext.textContent = '\n';
                     statusSubtext.className = 'text-lg text-red-700';
                     break;
                         

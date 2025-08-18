@@ -26,8 +26,6 @@ class TelegramHandlers:
             self.court_status['hours'] = {"open": 6, "close": 20}
         if 'hours_override' not in self.court_status:
             self.court_status['hours_override'] = None
-        if 'check_back_at' not in self.court_status:
-            self.court_status['check_back_at'] = None
 
     def _check_authorization(self, user_id: int) -> bool:
         return not self.authorized_users or user_id in self.authorized_users
@@ -78,7 +76,7 @@ class TelegramHandlers:
 Available commands:
 /status - Check current court status  
 /open - Set courts as OPEN  
-/closed - Set courts as CLOSED (with optional check back time)  
+/closed - Set courts as CLOSED  
 /change_hours - Change court operating hours  
 /clear_notes - Clear status notes
 
@@ -86,7 +84,13 @@ Current status: *{self.court_status['status'].upper()}*
 Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 """
 
-        await update.message.reply_text(welcome_msg)
+        keyboard = [
+            [InlineKeyboardButton("📊 Check Status", callback_data='check_status')],
+            [InlineKeyboardButton("🟢 Set Open", callback_data='set_open'), InlineKeyboardButton("🔴 Set Closed", callback_data='set_closed')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(welcome_msg, reply_markup=reply_markup)
 
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
@@ -110,10 +114,6 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
 🕐 Hours: {self._format_time_12h(self.court_status['hours']['open'])} - {self._format_time_12h(self.court_status['hours']['close'])}"""
 
-        if self.court_status.get('check_back_at'):
-            check_back = datetime.fromisoformat(self.court_status['check_back_at'])
-            status_msg += f"\n⏰ Check back at: {check_back.strftime('%Y-%m-%d %H:%M')}"
-
         if self.court_status.get('notes'):
             status_msg += f"\n📝 Notes: {self.court_status['notes']}"
 
@@ -129,7 +129,13 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 🔧 Manual override: {'Yes' if self.court_status['manual_override'] else 'No'}
         """
 
-        await update.message.reply_text(status_msg, parse_mode='Markdown')
+        keyboard = [
+            [InlineKeyboardButton("🔄 Refresh Status", callback_data='check_status')],
+            [InlineKeyboardButton("🟢 Set Open", callback_data='set_open'), InlineKeyboardButton("🔴 Set Closed", callback_data='set_closed')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(status_msg, parse_mode='Markdown', reply_markup=reply_markup)
 
     async def open(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
@@ -139,7 +145,7 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         username = update.effective_user.username or f"user_{user_id}"
         
-        self.court_status['check_back_at'] = None
+
         self.update_status("open", f"telegram:{username}", manual_override=True)
         
         keyboard = [
@@ -161,39 +167,17 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
 
         username = update.effective_user.username or f"user_{user_id}"
         
-        self.court_status['check_back_at'] = None
+
         self.update_status("closed", f"telegram:{username}", manual_override=True)
         
         keyboard = [
             [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
-            [InlineKeyboardButton("Check back in X hours", callback_data='check_back_closed')],
             [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await update.message.reply_text(
-            "🔴 Courts set to CLOSED\n\nWould you like to add notes or set a check back time?",
-            reply_markup=reply_markup
-        )
-
-    async def check_back_hours(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        user_id = update.effective_user.id
-        if not self._check_authorization(user_id):
-            await update.message.reply_text("Sorry, you're not authorized to use this bot.")
-            return
-
-        now = datetime.now(TARGET_TZ)
-        keyboard = [
-            [InlineKeyboardButton("1 hour", callback_data=f'check_back_{(now + timedelta(hours=1)).isoformat()}')],
-            [InlineKeyboardButton("2 hours", callback_data=f'check_back_{(now + timedelta(hours=2)).isoformat()}')],
-            [InlineKeyboardButton("4 hours", callback_data=f'check_back_{(now + timedelta(hours=4)).isoformat()}')],
-            [InlineKeyboardButton("Until tomorrow 6 AM", callback_data=f'check_back_{(now.replace(hour=6, minute=0, second=0) + timedelta(days=1)).isoformat()}')],
-            [InlineKeyboardButton("Custom time", callback_data='check_back_custom')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(
-            "🕐 When should users check back?",
+            "🔴 Courts set to CLOSED\n\nWould you like to add any notes?",
             reply_markup=reply_markup
         )
 
@@ -249,37 +233,18 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
             self.court_status['notes'] = ""
             await query.edit_message_text("✅ Status updated without notes")
             return ConversationHandler.END
-        
-        elif data == 'check_back_closed':
-            await self.check_back_hours(query, context)
+
+        elif data == 'check_status':
+            await self.status_command(query, context)
             return ConversationHandler.END
 
-        elif data.startswith('check_back_'):
-            if data == 'check_back_custom':
-                await query.edit_message_text(
-                    "📅 Please send the date and time when users should check back.\n"
-                    "Format: YYYY-MM-DD HH:MM\n"
-                    "Example: 2025-01-15 14:30"
-                )
-                return WAITING_FOR_HOURS_CHANGE
-            else:
-                check_back_str = data.replace('check_back_', '')
-                self.court_status['check_back_at'] = check_back_str
-                
-                username = query.from_user.username or f"user_{user_id}"
-                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
-                self.court_status['updated_by'] = f"telegram:{username}"
-                
-                check_back = datetime.fromisoformat(check_back_str)
-                await query.edit_message_text(f"🕐 Check back time set to {check_back.strftime('%Y-%m-%d %H:%M')}")
-                
-                keyboard = [
-                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
-                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                
-                await query.message.reply_text("Would you like to add any notes?", reply_markup=reply_markup)
+        elif data == 'set_open':
+            await self.open(query, context)
+            return ConversationHandler.END
+
+        elif data == 'set_closed':
+            await self.closed(query, context)
+            return ConversationHandler.END
 
         elif data in ['hours_today', 'hours_permanent']:
             context.user_data['hours_type'] = data
@@ -307,73 +272,45 @@ Last updated: {self._format_timestamp(self.court_status['last_updated'])}
     async def handle_hours_input(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = update.message.text.strip()
         
-        if 'hours_type' not in context.user_data:
-            try:
-                # Parse the datetime and assume it's in New York timezone
-                check_back_naive = datetime.strptime(text, '%Y-%m-%d %H:%M')
-                check_back = check_back_naive.replace(tzinfo=TARGET_TZ)
-                self.court_status['check_back_at'] = check_back.isoformat()
+        try:
+            if '-' not in text:
+                raise ValueError("Missing dash separator")
                 
-                username = update.effective_user.username or f"user_{update.effective_user.id}"
-                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
-                self.court_status['updated_by'] = f"telegram:{username}"
+            open_hour, close_hour = text.split('-')
+            open_hour = int(open_hour.strip())
+            close_hour = int(close_hour.strip())
+            
+            if not (0 <= open_hour <= 23) or not (0 <= close_hour <= 23):
+                raise ValueError("Hours must be between 0-23")
                 
-                await update.message.reply_text(f"🕐 Check back time set to {check_back.strftime('%Y-%m-%d %H:%M')}")
-                
-                keyboard = [
-                    [InlineKeyboardButton("Add Notes", callback_data='add_notes_closed')],
-                    [InlineKeyboardButton("No Notes", callback_data='no_notes_closed')]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                
-                await update.message.reply_text("Would you like to add any notes?", reply_markup=reply_markup)
-                
-            except ValueError:
-                await update.message.reply_text(
-                    "❌ Invalid format. Please use: YYYY-MM-DD HH:MM\n"
-                    "Example: 2025-01-15 14:30"
-                )
-                return WAITING_FOR_HOURS_CHANGE
-        else:
-            try:
-                if '-' not in text:
-                    raise ValueError("Missing dash separator")
-                    
-                open_hour, close_hour = text.split('-')
-                open_hour = int(open_hour.strip())
-                close_hour = int(close_hour.strip())
-                
-                if not (0 <= open_hour <= 23) or not (0 <= close_hour <= 23):
-                    raise ValueError("Hours must be between 0-23")
-                    
-                if open_hour >= close_hour:
-                    raise ValueError("Opening hour must be before closing hour")
-                
-                hours_type = context.user_data['hours_type']
-                
-                username = update.effective_user.username or f"user_{update.effective_user.id}"
-                
-                if hours_type == 'hours_permanent':
-                    self.court_status['hours'] = {"open": open_hour, "close": close_hour}
-                    await update.message.reply_text(f"✅ Hours permanently changed to {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
-                else:
-                    today = datetime.now(TARGET_TZ).strftime('%Y-%m-%d')
-                    self.court_status['hours_override'] = {
-                        "date": today,
-                        "hours": {"open": open_hour, "close": close_hour}
-                    }
-                    await update.message.reply_text(f"✅ Hours changed for today only: {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
-                
-                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
-                self.court_status['updated_by'] = f"telegram:{username}"
-                
-            except ValueError as e:
-                await update.message.reply_text(
-                    f"❌ Invalid format. Please use: OPEN-CLOSE\n"
-                    "Example: 7-19 (for 7 AM to 7 PM)\n"
-                    "Hours must be 0-23 and opening must be before closing"
-                )
-                return WAITING_FOR_HOURS_CHANGE
+            if open_hour >= close_hour:
+                raise ValueError("Opening hour must be before closing hour")
+            
+            hours_type = context.user_data['hours_type']
+            
+            username = update.effective_user.username or f"user_{update.effective_user.id}"
+            
+            if hours_type == 'hours_permanent':
+                self.court_status['hours'] = {"open": open_hour, "close": close_hour}
+                await update.message.reply_text(f"✅ Hours permanently changed to {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
+            else:
+                today = datetime.now(TARGET_TZ).strftime('%Y-%m-%d')
+                self.court_status['hours_override'] = {
+                    "date": today,
+                    "hours": {"open": open_hour, "close": close_hour}
+                }
+                await update.message.reply_text(f"✅ Hours changed for today only: {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
+            
+            self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
+            self.court_status['updated_by'] = f"telegram:{username}"
+            
+        except ValueError as e:
+            await update.message.reply_text(
+                f"❌ Invalid format. Please use: OPEN-CLOSE\n"
+                "Example: 7-19 (for 7 AM to 7 PM)\n"
+                "Hours must be 0-23 and opening must be before closing"
+            )
+            return WAITING_FOR_HOURS_CHANGE
 
         return ConversationHandler.END
 

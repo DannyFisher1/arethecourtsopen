@@ -45,8 +45,7 @@ COURT_STATUS = {
     "manual_override": False,
     "notes": "",
     "hours": {"open": DEFAULT_OPEN_HOUR, "close": DEFAULT_CLOSE_HOUR},
-    "hours_override": None,
-    "check_back_at": None
+    "hours_override": None
 }
 CONDITIONS = weather_set.MET_WEATHER_CONDITIONS
 
