@@ -168,10 +168,15 @@
                     statusIcon.innerHTML = '<i class="fas fa-clock text-yellow-500"></i>';
                     statusText.textContent = 'CLOSED UNTIL';
                     statusText.className = 'text-3xl font-bold mb-1 text-yellow-600';
+                    document.getElementById('hoursDisplay').style.display = 'none';
                     
                     if (statusData.closed_until) {
                         const reopenTime = new Date(statusData.closed_until);
-                        statusSubtext.textContent = `Reopening at ${reopenTime.toLocaleString()}`;
+                        const hours = reopenTime.getHours();
+                        const minutes = reopenTime.getMinutes().toString().padStart(2, '0');
+                        const ampm = hours >= 12 ? ' PM' : ' AM';
+                        const displayHours = hours % 12 || 12;
+                        statusSubtext.textContent = `Reopening at ${displayHours}:${minutes}${ampm}`;
                     } else {
                         statusSubtext.textContent = 'Courts temporarily closed';
                     }
