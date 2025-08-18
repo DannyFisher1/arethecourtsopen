@@ -52,7 +52,6 @@
                     <div class="text-center md:text-right">
                         <div id="statusText" class="text-3xl font-bold mb-1">Checking...</div>
                         <div id="statusSubtext" class="text-lg">Loading current status</div>
-                        <div id="hoursDisplay" class="text-md text-gray-600 mt-1">Hours: --</div>
                     </div>
                 </div>
             </div>
@@ -160,7 +159,6 @@
                     statusText.className = 'text-3xl font-bold mb-1 text-red-600';
                     statusSubtext.textContent = '\n';
                     statusSubtext.className = 'text-lg text-red-700';
-                    document.getElementById('hoursDisplay').style.display = 'none';
                     break;
 
                 case 'closed_until':
@@ -168,18 +166,7 @@
                     statusIcon.innerHTML = '<i class="fas fa-clock text-yellow-500"></i>';
                     statusText.textContent = 'CLOSED UNTIL';
                     statusText.className = 'text-3xl font-bold mb-1 text-yellow-600';
-                    document.getElementById('hoursDisplay').style.display = 'none';
-                    
-                    if (statusData.closed_until) {
-                        const reopenTime = new Date(statusData.closed_until);
-                        const hours = reopenTime.getHours();
-                        const minutes = reopenTime.getMinutes().toString().padStart(2, '0');
-                        const ampm = hours >= 12 ? ' PM' : ' AM';
-                        const displayHours = hours % 12 || 12;
-                        statusSubtext.textContent = `Reopening at ${displayHours}:${minutes}${ampm}`;
-                    } else {
-                        statusSubtext.textContent = 'Courts temporarily closed';
-                    }
+                    statusSubtext.textContent = 'Courts temporarily closed';
                     statusSubtext.className = 'text-lg text-yellow-700';
                     break;
                         
@@ -213,7 +200,7 @@
                     }
                 }
                 
-                document.getElementById('hoursDisplay').textContent = `Hours: ${hoursText}`;
+                
             }
             
             const notesSection = document.getElementById('notesSection');
