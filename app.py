@@ -103,7 +103,7 @@ def update_status(status: str, updated_by: str = "system", manual_override: bool
     
     COURT_STATUS.update({
         "status": status,
-        "last_updated": datetime.now().isoformat(),
+        "last_updated": datetime.now(TARGET_TZ).isoformat(),
         "updated_by": updated_by,
         "manual_override": manual_override
     })

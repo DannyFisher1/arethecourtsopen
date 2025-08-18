@@ -19,4 +19,5 @@ env/
 .env.local
 .env.development.local.env
 /venv/
-/_pycache/
+/pycache/
+__pycache__/

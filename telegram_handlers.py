@@ -3,6 +3,7 @@
 import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
+from zoneinfo import ZoneInfo
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, 
@@ -10,6 +11,8 @@ from telegram.ext import (
 )
 
 WAITING_FOR_NOTES, WAITING_FOR_HOURS_CHANGE, WAITING_FOR_HOURS_TYPE = range(3)
+
+TARGET_TZ = ZoneInfo("America/New_York")
 
 class TelegramHandlers:
     def __init__(self, court_status_dict: Dict[str, Any], update_status_func, authorized_users: set):
@@ -155,7 +158,7 @@ Last updated: {self.court_status['last_updated']}
             await update.message.reply_text("Sorry, you're not authorized to use this bot.")
             return
 
-        now = datetime.now()
+        now = datetime.now(TARGET_TZ)
         keyboard = [
             [InlineKeyboardButton("1 hour", callback_data=f'closed_until_{(now + timedelta(hours=1)).isoformat()}')],
             [InlineKeyboardButton("2 hours", callback_data=f'closed_until_{(now + timedelta(hours=2)).isoformat()}')],
@@ -197,7 +200,7 @@ Last updated: {self.court_status['last_updated']}
         username = update.effective_user.username or f"user_{user_id}"
         
         self.court_status['notes'] = ""
-        self.court_status['last_updated'] = datetime.now().strftime('%Y-%m-%dT%H:%M')
+        self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
         self.court_status['updated_by'] = f"telegram:{username}"
         
         await update.message.reply_text("🗑️ Status notes cleared")
@@ -266,7 +269,7 @@ Last updated: {self.court_status['last_updated']}
         username = update.effective_user.username or f"user_{update.effective_user.id}"
         
         self.court_status['notes'] = notes
-        self.court_status['last_updated'] = datetime.now().isoformat()
+        self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
         self.court_status['updated_by'] = f"telegram:{username}"
         
         await update.message.reply_text(f"✅ Notes added: {notes}")
@@ -277,7 +280,9 @@ Last updated: {self.court_status['last_updated']}
         
         if 'hours_type' not in context.user_data:
             try:
-                closed_until = datetime.strptime(text, '%Y-%m-%d %H:%M')
+                # Parse the datetime and assume it's in New York timezone
+                closed_until_naive = datetime.strptime(text, '%Y-%m-%d %H:%M')
+                closed_until = closed_until_naive.replace(tzinfo=TARGET_TZ)
                 self.court_status['closed_until'] = closed_until.isoformat()
                 
                 username = update.effective_user.username or f"user_{update.effective_user.id}"
@@ -322,14 +327,14 @@ Last updated: {self.court_status['last_updated']}
                     self.court_status['hours'] = {"open": open_hour, "close": close_hour}
                     await update.message.reply_text(f"✅ Hours permanently changed to {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
                 else:
-                    today = datetime.now().strftime('%Y-%m-%d')
+                    today = datetime.now(TARGET_TZ).strftime('%Y-%m-%d')
                     self.court_status['hours_override'] = {
                         "date": today,
                         "hours": {"open": open_hour, "close": close_hour}
                     }
                     await update.message.reply_text(f"✅ Hours changed for today only: {self._format_time_12h(open_hour)} - {self._format_time_12h(close_hour)}")
                 
-                self.court_status['last_updated'] = datetime.now().isoformat()
+                self.court_status['last_updated'] = datetime.now(TARGET_TZ).isoformat()
                 self.court_status['updated_by'] = f"telegram:{username}"
                 
             except ValueError as e:

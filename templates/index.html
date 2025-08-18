@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Are The Tennis Courts Open? - Central Park</title>
+    <title>Are The Courts Open? - Central Park</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=sports_tennis" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -28,8 +29,9 @@
     <div class="container mx-auto px-4 py-12">
         <header class="text-center mb-12">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-table-tennis text-green-500 mr-2"></i>
-                Are The Tennis Courts Open?
+                <!-- <img src="{{ url_for('static', filename='Tr.svg') }}" alt="Tennis Racket" class="text-5xl mx-auto"> -->
+                
+                Are The Courts Open?
             </h1>
             <p class="text-lg text-gray-600">Central Park Tennis Courts Status</p>
             <div id="lastUpdated" class="text-sm text-gray-500">Last updated: --</div>
