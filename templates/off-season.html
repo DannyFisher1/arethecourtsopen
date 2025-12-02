@@ -20,46 +20,46 @@
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-    <div class="container mx-auto px-4 py-12">
+    <div class="container mx-auto px-4 py-8 md:py-12">
         <header class="text-center mb-4 md:mb-6">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+            <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-2">
                 Are The Courts Open?
             </h1>
-            <p class="text-lg text-gray-600">Central Park Tennis Courts</p>
+            <p class="text-base md:text-lg text-gray-600">Central Park Tennis Courts</p>
             <div class="text-sm text-gray-500 mt-2">See you in 2026!</div>
         </header>
 
-        <main class="max-w-3xl mx-auto space-y-6">
+        <main class="max-w-3xl mx-auto space-y-3 md:space-y-6">
             <!-- Season Update & Winter Alternatives -->
-            <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-                <div class="flex flex-col lg:flex-row items-start gap-8">
+            <div class="bg-white rounded-xl p-6 md:p-8 shadow-sm border border-gray-100">
+                <div class="flex flex-col lg:flex-row items-start gap-4 lg:gap-8">
                     <!-- Season Message -->
                     <div class="flex-1 text-center lg:text-left">
                         <div class="flex items-center justify-center lg:justify-start mb-4">
-                            <div class="text-4xl mr-4 text-green-600">
+                            <div class="text-2xl md:text-4xl mr-4 text-green-600">
                             </div>
                             <div>
-                                <h2 class="text-xl font-bold text-gray-800 mb-1">Thanks for a great season!</h2>
+                                <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-1">Thanks for a great season!</h2>
                                 <p class="text-base text-gray-600">The courts are closed for winter.</p>
 
                                 <!-- Countdown Timer -->
-                                <div class="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <div class="text-sm text-gray-600 mb-3 text-center font-medium">Days until courts reopen:</div>
-                                    <div class="grid grid-cols-4 gap-4 text-center">
+                                <div class="mt-4 md:mt-6 bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-200">
+                                    <div class="text-sm text-gray-600 mb-2 md:mb-3 text-center font-medium">Days until courts reopen:</div>
+                                    <div class="grid grid-cols-4 gap-3 md:gap-4 text-center">
                                         <div class="flex flex-col items-center">
-                                            <div id="days" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div id="days" class="text-xl md:text-3xl font-bold text-blue-600 leading-none">00</div>
                                             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Days</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <div id="hours" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div id="hours" class="text-xl md:text-3xl font-bold text-blue-600 leading-none">00</div>
                                             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Hours</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <div id="minutes" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div id="minutes" class="text-xl md:text-3xl font-bold text-blue-600 leading-none">00</div>
                                             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Minutes</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <div id="seconds" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div id="seconds" class="text-xl md:text-3xl font-bold text-blue-600 leading-none">00</div>
                                             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Seconds</div>
                                         </div>
                                     </div>
@@ -70,18 +70,18 @@
 
                     <!-- Winter Alternatives -->
                     <div class="flex-1">
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center justify-center lg:justify-start">
+                        <h3 class="text-sm md:text-base font-semibold text-gray-800 mb-4 flex items-center justify-center lg:justify-start">
                             <i class="fas fa-snowflake text-blue-300 mr-2"></i>
                             Where to play in Winter?
                         </h3>
-                        <div class="grid grid-cols-1 gap-3">
-                            <a href="https://www.nycgovparks.org/facilities/tennis" target="_blank" class="block p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group">
-                                <div class="font-medium text-gray-900 group-hover:text-blue-600">NYC Indoor Courts</div>
-                                <div class="text-sm text-gray-500 mt-1">View list of indoor bubbles →</div>
+                        <div class="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-3">
+                            <a href="https://www.nycgovparks.org/facilities/tennis" target="_blank" class="block p-2 md:p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group text-center md:text-left">
+                                <div class="text-sm md:text-base font-medium text-gray-900 group-hover:text-blue-600">NYC Indoor Courts</div>
+                                <div class="hidden md:block text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">View list of indoor bubbles →</div>
                             </a>
-                            <a href="https://www.google.com/search?q=indoor+tennis+nyc" target="_blank" class="block p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group">
-                                <div class="font-medium text-gray-900 group-hover:text-blue-600">Private Clubs</div>
-                                <div class="text-sm text-gray-500 mt-1">Search nearby clubs →</div>
+                            <a href="https://www.google.com/search?q=indoor+tennis+nyc" target="_blank" class="block p-2 md:p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group text-center md:text-left">
+                                <div class="text-sm md:text-base font-medium text-gray-900 group-hover:text-blue-600">Private Clubs</div>
+                                <div class="hidden md:block text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">Search nearby clubs →</div>
                             </a>
                         </div>
                     </div>
@@ -91,17 +91,19 @@
                         <!-- Tip Jar Section -->
 
                         <!-- Developer / Hire Me Section -->
-            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 shadow-sm">
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <div class="text-blue-500 text-2xl">
-                        <i class="fas fa-code"></i>
+            <div class="bg-blue-50 rounded-lg p-3 md:p-4 border border-blue-100 shadow-sm">
+                <div class="flex flex-col gap-3 md:gap-4">
+                    <div class="flex items-center justify-center md:justify-start">
+                        <div class="text-blue-500 text-xl md:text-2xl mr-3">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3 class="text-base md:text-lg font-bold text-gray-800">Need a website or app built?</h3>
                     </div>
-                    <div class="flex-grow text-center md:text-left">
-                        <h3 class="text-lg font-bold text-gray-800">Need a website or app built?</h3>
-                        <p class="text-sm text-gray-600 mb-3">
+                    <div class="text-center md:text-left">
+                        <p class="text-xs md:text-sm text-gray-600 mb-2 md:mb-3">
                             If you have an idea or need for a website, mobile app, dashboard, or any custom tool, Send me a message!
                         </p>
-                        <a href="mailto:danielnathanfisher@gmail.com" class="inline-flex items-center justify-center px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shadow-sm text-sm">
+                        <a href="mailto:danielnathanfisher@gmail.com" class="inline-flex items-center justify-center px-3 md:px-4 py-1.5 md:py-2 bg-white text-blue-600 font-semibold rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shadow-sm text-xs md:text-sm">
                             <i class="fas fa-paper-plane mr-2"></i>
                             Contact Me
                         </a>
@@ -109,18 +111,20 @@
                 </div>
             </div>
 
-            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 shadow-sm">
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <div class="text-amber-500 text-2xl">
-                        <i class="fas fa-heart"></i>
+            <div class="bg-amber-50 rounded-lg p-3 md:p-4 border border-amber-100 shadow-sm">
+                <div class="flex flex-col gap-3 md:gap-4">
+                    <div class="flex items-center justify-center md:justify-start">
+                        <div class="text-amber-500 text-xl md:text-2xl mr-3">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3 class="text-base md:text-lg font-bold text-gray-800">Enjoyed the site?</h3>
                     </div>
-                    <div class="flex-grow text-center md:text-left">
-                        <h3 class="text-lg font-bold text-gray-800">Enjoyed the site?</h3>
-                        <p class="text-sm text-gray-600 mb-3">
+                    <div class="text-center md:text-left">
+                        <p class="text-xs md:text-sm text-gray-600 mb-2 md:mb-3">
                             If this saved you sleep, headaches, or a few trips to closed courts, you can say thanks by buying me a coffee.
                             It genuinely helps justify keeping this project running and improving.
                         </p>
-                        <a href="https://buymeacoffee.com/arethecourtsopen" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm text-sm">
+                        <a href="https://buymeacoffee.com/arethecourtsopen" target="_blank" class="inline-flex items-center justify-center px-3 md:px-4 py-1.5 md:py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm text-xs md:text-sm">
                             <i class="fas fa-coffee mr-2"></i>
                             Buy me a coffee
                         </a>
@@ -144,7 +148,7 @@
 
         </main>
 
-        <footer class="mt-16 text-center text-gray-500 text-sm">
+        <footer class="mt-8 md:mt-16 text-center text-gray-500 text-sm">
             <p class="mt-2">© 2025 arethecourtsopen.com | <b>Not</b> affiliated with NYC Parks.</p>
             <a href="mailto:danielnathanfisher@gmail.com" class="underline text-blue-600 hover:text-blue-800">Contact</a>
         </footer>
