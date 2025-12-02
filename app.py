@@ -25,7 +25,7 @@ WEATHER_LAT = float(os.getenv('WEATHER_LAT', '40.7128'))
 WEATHER_LON = float(os.getenv('WEATHER_LON', '-74.0060'))
 INITIAL_STATUS = os.getenv('INITIAL_STATUS', 'open')
 INITIAL_CONDITIONS = os.getenv('INITIAL_CONDITIONS', 'Checking conditions...')
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_DEV')
 AUTHORIZED_USERS = set(map(int, os.getenv('AUTHORIZED_USERS', '').split(',')) if os.getenv('AUTHORIZED_USERS') else [])
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
@@ -118,7 +118,7 @@ def update_weather_only(weather_data: dict):
 # --- Flask Routes ---
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('off-season.html')
 
 @app.route('/api/status')
 def get_status():

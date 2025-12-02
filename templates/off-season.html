@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Are The Courts Open? - Season Over</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Keeping your original card styles */
+        .glass-card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div class="container mx-auto px-4 py-12">
+        <header class="text-center mb-4 md:mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+                Are The Courts Open?
+            </h1>
+            <p class="text-lg text-gray-600">Central Park Tennis Courts</p>
+            <div class="text-sm text-gray-500 mt-2">See you in 2026!</div>
+        </header>
+
+        <main class="max-w-3xl mx-auto space-y-6">
+            <!-- Season Update & Winter Alternatives -->
+            <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                <div class="flex flex-col lg:flex-row items-start gap-8">
+                    <!-- Season Message -->
+                    <div class="flex-1 text-center lg:text-left">
+                        <div class="flex items-center justify-center lg:justify-start mb-4">
+                            <div class="text-4xl mr-4 text-green-600">
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800 mb-1">Thanks for a great season!</h2>
+                                <p class="text-base text-gray-600">The courts are closed for winter.</p>
+
+                                <!-- Countdown Timer -->
+                                <div class="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <div class="text-sm text-gray-600 mb-3 text-center font-medium">Days until courts reopen:</div>
+                                    <div class="grid grid-cols-4 gap-4 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <div id="days" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Days</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div id="hours" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Hours</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div id="minutes" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Minutes</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div id="seconds" class="text-3xl font-bold text-blue-600 leading-none">00</div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Seconds</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Winter Alternatives -->
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center justify-center lg:justify-start">
+                            <i class="fas fa-snowflake text-blue-300 mr-2"></i>
+                            Where to play in Winter?
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            <a href="https://www.nycgovparks.org/facilities/tennis" target="_blank" class="block p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group">
+                                <div class="font-medium text-gray-900 group-hover:text-blue-600">NYC Indoor Courts</div>
+                                <div class="text-sm text-gray-500 mt-1">View list of indoor bubbles →</div>
+                            </a>
+                            <a href="https://www.google.com/search?q=indoor+tennis+nyc" target="_blank" class="block p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 group">
+                                <div class="font-medium text-gray-900 group-hover:text-blue-600">Private Clubs</div>
+                                <div class="text-sm text-gray-500 mt-1">Search nearby clubs →</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                        <!-- Tip Jar Section -->
+
+                        <!-- Developer / Hire Me Section -->
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 shadow-sm">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="text-blue-500 text-2xl">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <h3 class="text-lg font-bold text-gray-800">Need a website or app built?</h3>
+                        <p class="text-sm text-gray-600 mb-3">
+                            If you have an idea or need for a website, mobile app, dashboard, or any custom tool, Send me a message!
+                        </p>
+                        <a href="mailto:danielnathanfisher@gmail.com" class="inline-flex items-center justify-center px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shadow-sm text-sm">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Contact Me
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 shadow-sm">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="text-amber-500 text-2xl">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <h3 class="text-lg font-bold text-gray-800">Enjoyed the site?</h3>
+                        <p class="text-sm text-gray-600 mb-3">
+                            If this saved you sleep, headaches, or a few trips to closed courts, you can say thanks by buying me a coffee.
+                            It genuinely helps justify keeping this project running and improving.
+                        </p>
+                        <a href="https://buymeacoffee.com/arethecourtsopen" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors shadow-sm text-sm">
+                            <i class="fas fa-coffee mr-2"></i>
+                            Buy me a coffee
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Map -->
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6639.319113314451!2d-73.9620658!3d40.789886599999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25988f989506d%3A0x6d87771a059466ba!2sCentral%20Park%20Tennis%20Center!5e1!3m2!1sen!2sus!4v1755451031278!5m2!1sen!2sus" 
+                    width="100%" 
+                    height="200" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+            </div>
+
+        </main>
+
+        <footer class="mt-16 text-center text-gray-500 text-sm">
+            <p class="mt-2">© 2025 arethecourtsopen.com | <b>Not</b> affiliated with NYC Parks.</p>
+            <a href="mailto:danielnathanfisher@gmail.com" class="underline text-blue-600 hover:text-blue-800">Contact</a>
+        </footer>
+    </div>
+
+    <script>
+        // Set the date we're counting down to (April 5th, 2026)
+        const countDownDate = new Date('2026-04-05T00:00:00').getTime();
+
+        // Function to update countdown
+        function updateCountdown() {
+            // Get today's date and time
+            const now = new Date().getTime();
+
+            // Find the distance between now and the countdown date
+            const distance = countDownDate - now;
+
+            // Time calculations for days, hours, minutes and seconds
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result with leading zeros
+            document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+
+            // If the countdown is finished, show courts are open
+            if (distance < 0) {
+                document.getElementById("days").innerHTML = "🎾";
+                document.getElementById("hours").innerHTML = "🎾";
+                document.getElementById("minutes").innerHTML = "🎾";
+                document.getElementById("seconds").innerHTML = "🎾";
+            }
+        }
+
+        // Update countdown immediately on page load
+        updateCountdown();
+
+        // Update the countdown every 1 second
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>
